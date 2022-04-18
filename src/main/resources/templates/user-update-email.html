@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <div th:replace="fragments :: site-header"></div>
+</head>
+<body>
+    <div class="page-wrapper" th:classappend="${#locale}">
+        <div th:replace="fragments :: site-navigation"></div>
+
+        <div class="breadcrumb-wrapper">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a th:href="@{'/'}"><i class="fa fa-home"></i></a></li>
+                    <li class="breadcrumb-item"><a th:href="@{'/profile'}" th:text="#{label.profile}"></a></li>
+                    <li class="breadcrumb-item"><a th:href="@{'/profile/update/email'}" th:text="#{label.updateEmail}"></a></li>
+                </ol>
+            </nav>
+        </div>
+
+        <div class="container mt-5">
+            <div class="row">
+                <div class="userUpdateEmailResponseModalWrapper">
+                    <button id="userUpdateEmailResponseModalShowBtn"
+                            type="button"
+                            class="d-none visually-hidden"
+                            data-bs-toggle="modal"
+                            data-bs-target="#userUpdateEmailResponseModal">
+                    </button>
+
+                    <div class="modal fade"
+                         id="userUpdateEmailErrorModal"
+                         tabindex="-1"
+                         aria-labelledby="userUpdateEmailResponseModalLabel"
+                         aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="userUpdateEmailResponseModalLabel"></h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body"></div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" th:text="#{label.close}"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="offset-lg-2 col-lg-8 mb-4">
+                    <div class="user-update-email-form-wrapper card shadow">
+                        <div class="card-header text-center">
+                            <h3 class="p-3" th:text="#{form.header.user.update.email}"></h3>
+                        </div>
+
+                        <div class="card-body p-5">
+                            <form id="updateEmailForm"
+                                  th:data-userId="${user.id}"
+                                  class="update-email-form needs-validation"
+                                  style="max-width: 700px; margin: 0 auto;"
+                                  autocomplete="off"
+                                  novalidate>
+
+                                <div class="mb-4">
+                                    <label for="email" class="form-label" th:text="#{label.enterNewEmail}"></label>
+                                    <input class="form-control update-email-input"
+                                           type="email"
+                                           id="email"
+                                           name="email"
+                                           minlength="4"
+                                           maxlength="64"
+                                           th:placeholder="#{label.email}"
+                                           aria-describedby="update-email-input-group-text update-email-invalid-feedback"
+                                           required>
+                                    <div id="update-email-invalid-feedback" class="invalid-feedback" th:text="#{user.email.invalid}"></div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="password" class="form-label" th:text="#{label.enterPassword}"></label>
+                                    <div class="input-group has-validation">
+                                        <input class="form-control update-email-input update-email-input-password"
+                                               type="password"
+                                               id="password"
+                                               name="password"
+                                               minlength="6"
+                                               maxlength="32"
+                                               th:placeholder="#{label.password}"
+                                               required>
+                                    </div>
+                                </div>
+
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+                                <div id="updateEmailSubmitBtn" class="update-email-submit-btn">
+                                    <div class="text-center mt-3">
+                                        <div class="spinner-border text-dark d-none me-3" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <button class="btn btn-primary mr-2" type="submit">
+                                            <span th:text="#{label.changeEmail}"></span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div th:replace="fragments :: site-footer"></div>
+        <span id="emailChangeSuccessHeader" class="d-none visually-hidden" th:text="#{label.emailChangeSuccessHeader}"></span>
+        <span id="emailChangeSuccessDetail" class="d-none visually-hidden" th:text="#{label.emailChangeSuccessDetail}"></span>
+    </div>
+
+    <script type="text/javascript">
+        const updateEmailForm = $('#updateEmailForm');
+        const updateEmailSubmitBtn = $('#updateEmailSubmitBtn');
+        const formControls = $('.form-control');
+        const userUpdateEmailResponseModal = $('#userUpdateEmailResponseModal');
+        const userUpdateEmailResponseShowBtn = $('#userUpdateEmailResponseShowBtn');
+        const userId = updateEmailForm.attr("data-userId");
+
+        updateEmailForm.on('submit', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const that = $(this);
+            const ajaxUrl = serverContext + `profile/update/email`;
+            const invalidFormControls = $('.form-control:invalid');
+            const formData = that.serialize();
+
+            if (invalidFormControls.length <= 0) {
+                updateEmailSubmitBtn.find('.spinner-border').removeClass('d-none');
+
+                setTimeout(function () {
+                    $.ajax({
+                        type: 'POST',
+                        url: ajaxUrl,
+                        data: formData,
+                        cache: false
+                    }).done(function (response) {
+                        localStorage.setItem('messageType', 'success');
+                        localStorage.setItem('messageHeader', $('#emailChangeSuccessHeader').text());
+                        localStorage.setItem('messageDetail', $('#emailChangeSuccessDetail').text());
+                        window.location.href = serverContext + `logout`;
+                    }).fail(function (response) {
+                        that.removeClass('was-validated');
+                        formControls.removeClass('is-invalid');
+
+                        const fieldErrors = response.responseJSON;
+                        if (fieldErrors) {
+                            for (const field in fieldErrors) {
+                                $('#' + field).addClass('is-invalid');
+                            }
+                        } else {
+                            userUpdateEmailResponseModal.find('.modal-title').text($('#labelError').text());
+                            userUpdateEmailResponseModal.find('.modal-body').text(response.responseText);
+                            userUpdateEmailResponseShowBtn.trigger('click');
+                        }
+                    }).always(function () {
+                        updateEmailSubmitBtn.find('.spinner-border').addClass('d-none');
+                    });
+                }, 1500);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <div th:replace="fragments :: site-header"></div>
+</head>
+<body>
+    <div class="page-wrapper" th:classappend="${#locale}">
+        <div th:replace="fragments :: site-navigation"></div>
+
+        <div class="breadcrumb-wrapper">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a th:href="@{'/'}"><i class="fa fa-home"></i></a></li>
+                    <li class="breadcrumb-item"><a th:href="@{'/cart'}" th:text="#{label.cart}"></a></li>
+                </ol>
+            </nav>
+        </div>
+
+        <div class="container" style="margin-top: 50px">
+            <div class="row">
+                <div class="col-lg-12 shadow rounded-3 p-5">
+                    <h3 th:if="${cartItems.size() <= 0}" th:text="#{label.cartEmpty}" class="text-center"></h3>
+                    <th:block th:if="${cartItems.size() > 0}" >
+                        <table class="table mb-5">
+                            <thead>
+                            <tr>
+                                <th th:text="#{label.photo}"></th>
+                                <th th:text="#{label.productName}"></th>
+                                <th>
+                                    <span th:text="#{label.unitPrice}"></span>
+                                    (<span th:text="${@environment.getProperty('site.currency')}"></span>)
+                                </th>
+                                <th th:text="#{label.quantity}"></th>
+                                <th>
+                                    <span th:text="#{label.price}"></span>
+                                    (<span th:text="${@environment.getProperty('site.currency')}"></span>)
+                                </th>
+                                <th th:text="#{label.actions}"></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="cartItem :  ${cartItems}"
+                                th:id="${'cart_row_' + cartItem.id}">
+                                <td>
+                                    <img class="rounded-3"
+                                         th:src="@{${cartItem.product.productPhotos.size() <= 0 ? '/images/thumbnail.jpg' : '/uploads/product/' + cartItem.product.productPhotos[0].photoUrl}}"
+                                         alt=""
+                                         style="height: 40px;">
+                                </td>
+                                <td th:text="${cartItem.product.name}"></td>
+                                <td th:text="${cartItem.product.resalePrice}"></td>
+                                <td>
+                                    <select class="cart-item-quantity">
+                                        <option th:value="${cartItem.quantity}"
+                                                th:text="${cartItem.quantity}"
+                                                selected></option>
+                                        <option value="1" th:text="#{label.n1}"></option>
+                                        <option value="2" th:text="#{label.n2}"></option>
+                                        <option value="3" th:text="#{label.n3}"></option>
+                                        <option value="4" th:text="#{label.n4}"></option>
+                                        <option value="5" th:text="#{label.n5}"></option>
+                                    </select>
+                                </td>
+                                <td th:text="${cartItem.quantity * cartItem.product.resalePrice}"></td>
+                                <td>
+                                    <div style="display: inline-block"
+                                         data-bs-toggle="tooltip"
+                                         data-bs-placement="top"
+                                         th:title="#{label.updateCart}">
+                                        <button class="btn btn-primary btn-sm cart-update-action-btn"
+                                                th:data-btn-productId="${cartItem.product.id}"
+                                                th:data-btn-cartItemId="${cartItem.id}">
+                                            <i class="fa fa-refresh"></i>
+                                        </button>
+                                    </div>
+                                    <div style="display: inline-block"
+                                         data-bs-toggle="tooltip"
+                                         data-bs-placement="top"
+                                         th:title="#{label.deleteItem}">
+                                        <button class="btn btn-danger btn-sm cart-delete-action-btn"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteConfirmModal"
+                                                th:data-btn-productId="${cartItem.product.id}"
+                                                th:data-btn-cartItemId="${cartItem.id}">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+                        <hr class="dropdown-divider mb-3">
+                        <h5>
+                            <span class="float-start" th:text="${'Total'}"></span>
+                            <span class="float-end" th:text="${@environment.getProperty('site.currency') + ' ' + totalPrice}"></span>
+                        </h5>
+                        <br>
+                        <hr class="dropdown-divider mt-3">
+
+                        <div class="text-center mt-5">
+                            <a class="btn btn-primary" th:href="@{'/products'}">
+                                <i class="fa fa-arrow-left"></i>
+                                <span th:text="#{label.continueShopping}"></span>
+                            </a>
+                            <a class="btn btn-primary" href="#">
+                                <span th:text="#{label.checkoutNow}"></span>
+                                <i class="fa fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </th:block>
+                </div>
+            </div>
+
+
+            <!-- Delete Confirm Modal -->
+            <div class="modal fade"
+                 id="deleteConfirmModal"
+                 tabindex="-1"
+                 aria-labelledby="deleteConfirmModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteConfirmModalLabel" th:text="#{label.deleteItem}"></h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body" th:text="#{label.deleteItemPermanently}"></div>
+                        <div class="modal-footer">
+                            <div class="spinner-border text-dark d-none" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <button id="deleteCancelBtn"
+                                    type="button"
+                                    class="btn btn-secondary"
+                                    data-bs-dismiss="modal" th:text="#{label.cancel}"></button>
+                            <button id="deleteConfirmBtn"
+                                    type="button"
+                                    class="btn btn-danger"
+                                    data-modal-productId=""
+                                    data-modal-cartItemId="" th:text="#{label.confirm}"></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ajax Response Modal -->
+            <div class="modal fade"
+                 id="cartResponseModal"
+                 tabindex="-1"
+                 aria-labelledby="cartResponseModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="cartResponseModalLabel"></h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body"></div>
+                    </div>
+                </div>
+            </div>
+            <button id="cartResponseModalBtn" class="d-none visually-hidden" type="button" data-bs-toggle="modal" data-bs-target="#cartResponseModal"></button>
+        </div>
+        <div th:replace="fragments :: site-footer"></div>
+    </div>
+
+    <script type="text/javascript">
+        const cartResponseModal = $('#cartResponseModal');
+        const cartResponseModalBtn = $('#cartResponseModalBtn');
+        const cartUpdateActionBtn = $('.cart-update-action-btn');
+
+        cartUpdateActionBtn.on('click', function () {
+            const that = $(this);
+            const cartItemId = that.attr('data-btn-cartItemId');
+            const productId = that.attr('data-btn-productId');
+            const cartRow = $(`#cart_row_${cartItemId}`);
+            const quantity = cartRow.find('.cart-item-quantity').find(':selected').text();
+            const ajaxUrl = serverContext + `cart/update`;
+
+            that.find('.fa').addClass('rotate');
+
+            setTimeout(function () {
+                $.ajax({
+                    type: 'POST',
+                    url: ajaxUrl,
+                    data: $.param({productId, quantity, _csrf}),
+                    cache: false
+                }).done(function (response) {
+                    window.location.href = serverContext + 'cart';
+                }).fail(function (response) {
+                    cartResponseModal.find('.modal-title').text($('#labelError').text());
+                    cartResponseModal.find('.modal-body').text(response.responseText);
+                    cartResponseModalBtn.trigger('click');
+                }).always(function () {
+                    that.find('.fa').removeClass('rotate');
+                });
+            }, 1500);
+        });
+
+
+
+        const cartDeleteActionBtn = $('.cart-delete-action-btn');
+        const deleteConfirmModal = $('#deleteConfirmModal');
+        const deleteConfirmBtn = $('#deleteConfirmBtn');
+        const spinner = deleteConfirmModal.find('.spinner-border');
+
+        cartDeleteActionBtn.on('click', function () {
+            const that = $(this);
+            deleteConfirmBtn.attr('data-modal-cartItemId', that.attr('data-btn-cartItemId'));
+            deleteConfirmBtn.attr('data-modal-productId', that.attr('data-btn-productId'));
+        });
+
+        deleteConfirmBtn.on('click', function () {
+            const that = $(this);
+            const productId = that.attr('data-modal-productId');
+            const ajaxUrl = serverContext + `cart/item/delete`;
+
+            spinner.removeClass('d-none');
+
+            setTimeout(function () {
+                $.ajax({
+                    type: 'POST',
+                    url: ajaxUrl,
+                    data: $.param({productId, _csrf}),
+                    cache: false
+                }).done(function (response) {
+                    window.location.href = serverContext + 'cart';
+                }).fail(function (response) {
+                    cartResponseModal.find('.modal-title').text($('#labelError').text());
+                    cartResponseModal.find('.modal-body').text(response.responseText);
+
+                    cartResponseModalBtn.trigger('click');
+                }).always(function () {
+                    spinner.addClass('d-none');
+                });
+            }, 1500);
+        });
+    </script>
+</body>
+</html>

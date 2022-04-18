@@ -1,0 +1,121 @@
+@font-face {
+    font-family: "Roboto";
+    src: url("../font/roboto/Roboto-Black.ttf");
+    font-weight: 900;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Roboto";
+    src: url("../font/roboto/Roboto-BlackItalic.ttf");
+    font-weight: 900;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "Roboto";
+    src: url("../font/roboto/Roboto-Bold.ttf");
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Roboto";
+    src: url("../font/roboto/Roboto-BoldItalic.ttf");
+    font-weight: 700;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "Roboto";
+    src: url("../font/roboto/Roboto-Medium.ttf");
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Roboto";
+    src: url("../font/roboto/Roboto-MediumItalic.ttf");
+    font-weight: 500;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "Roboto";
+    src: url("../font/roboto/Roboto-Regular.ttf");
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Roboto";
+    src: url("../font/roboto/Roboto-Italic.ttf");
+    font-weight: 400;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "Roboto";
+    src: url("../font/roboto/Roboto-Light.ttf");
+    font-weight: 300;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Roboto";
+    src: url("../font/roboto/Roboto-LightItalic.ttf");
+    font-weight: 300;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "Roboto";
+    src: url("../font/roboto/Roboto-Thin.ttf");
+    font-weight: 100;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Roboto";
+    src: url("../font/roboto/Roboto-ThinItalic.ttf");
+    font-weight: 100;
+    font-style: italic;
+}
+
+
+
+
+@font-face {
+    font-family: "Hind Siliguri";
+    src: url("../font/hind_siliguri/HindSiliguri-Bold.ttf");
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Hind Siliguri";
+    src: url("../font/hind_siliguri/HindSiliguri-SemiBold.ttf");
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Hind Siliguri";
+    src: url("../font/hind_siliguri/HindSiliguri-Medium.ttf");
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Hind Siliguri";
+    src: url("../font/hind_siliguri/HindSiliguri-Regular.ttf");
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Hind Siliguri";
+    src: url("../font/hind_siliguri/HindSiliguri-Light.ttf");
+    font-weight: 300;
+    font-style: normal;
+}

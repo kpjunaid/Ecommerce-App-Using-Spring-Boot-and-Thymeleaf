@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <div th:replace="fragments :: site-header"></div>
+</head>
+<body>
+    <div class="page-wrapper" th:classappend="${#locale}">
+        <div th:replace="fragments :: site-navigation"></div>
+
+        <div class="breadcrumb-wrapper">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a th:href="@{'/'}"><i class="fa fa-home"></i></a></li>
+                    <li class="breadcrumb-item"><a href="#" th:text="#{label.admin}"></a></li>
+                    <li class="breadcrumb-item"><a th:href="@{'/admin/users'}" th:text="#{label.users}"></a></li>
+                </ol>
+            </nav>
+        </div>
+
+        <div class="container-fluid">
+            <div th:if="${users == null || users.size() <= 0}">
+                <h1 class="display-6 text-center m-5" th:text="#{label.noUser}"></h1>
+            </div>
+            <div th:if="${users != null && users.size() > 0}">
+                <h1 class="display-6 text-center m-5" th:text="#{label.userList}"></h1>
+
+                <div class="offcanvas offcanvas-end" tabindex="-1" id="userSearchOffCanvas" aria-labelledby="userSearchOffCanvasLabel">
+                    <div class="offcanvas-header">
+                        <h5 id="userSearchOffCanvasLabel" th:text="#{label.searchUserList}"></h5>
+                        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                    </div>
+                    <div class="offcanvas-body">
+                        <div class="user-search-criteria mb-4">
+                            <h6 th:text="#{label.searchBy}"></h6>
+                            <div class="form-check ms-3">
+                                <input class="user-search-field form-check-input"
+                                       type="radio"
+                                       name="userSearchField"
+                                       value="id"
+                                       checked>
+                                <label class="form-check-label" th:text="#{label.id}"></label>
+                            </div>
+                            <div class="form-check ms-3">
+                                <input class="user-search-field form-check-input"
+                                       type="radio"
+                                       name="userSearchField"
+                                       value="email">
+                                <label class="form-check-label" th:text="#{label.email}"></label>
+                            </div>
+                            <div class="form-check ms-3">
+                                <input class="user-search-field form-check-input"
+                                       type="radio"
+                                       name="userSearchField"
+                                       value="firstName">
+                                <label class="form-check-label" th:text="#{label.firstName}"></label>
+                            </div>
+                            <div class="form-check ms-3">
+                                <input class="user-search-field form-check-input"
+                                       type="radio"
+                                       name="userSearchField"
+                                       value="lastName">
+                                <label class="form-check-label" th:text="#{label.lastName}"></label>
+                            </div>
+                        </div>
+
+                        <form action="" method="" id="userSearchForm" autocomplete="off" novalidate>
+                            <div class="input-group mb-3">
+                                <input type="text"
+                                       class="form-control"
+                                       id="userSearchInput"
+                                       name="userSearchInput"
+                                       minlength="2"
+                                       maxlength="256"
+                                       th:placeholder="#{label.searchKeyword}"
+                                       required>
+                                <div class="invalid-feedback d-none" th:text="#{label.search.invalid}"></div>
+                            </div>
+                            <button type="submit"
+                                    id="userSearchSubmitBtn"
+                                    class="btn btn-primary"
+                                    th:text="#{label.search}">
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="offcanvas offcanvas-end" tabindex="-1" id="userFilterOffCanvas" aria-labelledby="userFilterOffCanvasLabel">
+                    <div class="offcanvas-header">
+                        <h5 id="userFilterOffCanvasLabel" th:text="#{label.filterCriteria}"></h5>
+                        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                    </div>
+                    <div class="offcanvas-body">
+                        <div class="user-filter-gender">
+                            <h6 th:text="#{label.gender}"></h6>
+                            <div class="form-check ms-3">
+                                <input class="user-filter-input form-check-input"
+                                       type="radio"
+                                       name="userFilterGender"
+                                       data-filter-field="gender"
+                                       value="Male">
+                                <label class="form-check-label" th:text="#{label.male}"></label>
+                            </div>
+                            <div class="form-check ms-3">
+                                <input class="user-filter-input form-check-input"
+                                       type="radio"
+                                       name="userFilterGender"
+                                       data-filter-field="gender"
+                                       value="Female">
+                                <label class="form-check-label" th:text="#{label.female}"></label>
+                            </div>
+                        </div>
+                        <hr class="dropdown-divider mt-4 mb-4">
+                        <div class="user-filter-enabled">
+                            <h6 th:text="#{label.userState}"></h6>
+                            <div class="form-check ms-3">
+                                <input class="user-filter-input form-check-input"
+                                       type="radio"
+                                       name="userFilterEnabled"
+                                       data-filter-field="enabled"
+                                       value="true">
+                                <label class="form-check-label" th:text="#{label.enabled}"></label>
+                            </div>
+                            <div class="form-check ms-3">
+                                <input class="user-filter-input form-check-input"
+                                       type="radio"
+                                       name="userFilterEnabled"
+                                       data-filter-field="enabled"
+                                       value="false">
+                                <label class="form-check-label" th:text="#{label.disabled}"></label>
+                            </div>
+                        </div>
+                        <hr class="dropdown-divider mt-4 mb-4">
+                        <div class="user-filter-role">
+                            <h6 th:text="#{label.roles}"></h6>
+                            <th:block th:each="role: ${allRoles}">
+                                <div class="form-check ms-3">
+                                    <input class="user-filter-input form-check-input"
+                                           type="radio"
+                                           name="userFilterRole"
+                                           data-filter-field="role"
+                                           th:value="${role.name}">
+                                    <label class="form-check-label" th:text="${role.name}"></label>
+                                </div>
+                            </th:block>
+                        </div>
+
+                        <button type="button"
+                                id="userFilterSubmitBtn"
+                                class="btn btn-primary mt-5"
+                                th:text="#{label.filter}">
+                        </button>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end mb-3">
+                    <button class="btn btn-primary me-3"
+                            type="button"
+                            data-bs-toggle="offcanvas"
+                            data-bs-target="#userSearchOffCanvas"
+                            aria-controls="userSearchOffCanvas">
+                        <i class="fa fa-search"></i>
+                        <span th:text="#{label.searchUserList}"></span>
+                    </button>
+
+                    <button class="btn btn-primary me-3"
+                            type="button"
+                            data-bs-toggle="offcanvas"
+                            data-bs-target="#userFilterOffCanvas"
+                            aria-controls="userFilterOffCanvas">
+                        <i class="fa fa-filter"></i>
+                        <span th:text="#{label.filterUserList}"></span>
+                    </button>
+
+                    <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle"
+                                id="sortDropdown"
+                                type="button"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false" th:text="${'Sorted By ' + sort + ' (' + dir + ')'}">
+                        </button>
+                        <ul class="dropdown-menu shadow" aria-labelledby="sortDropdown">
+                            <li>
+                                <a class="dropdown-item"
+                                   th:href="@{'/admin/users/page/' + ${currentPage} + '?sort=id&dir=asc'}">
+                                    Sort By Id (Asc)
+                                </a>
+                            </li>
+                            <hr class="dropdown-divider">
+                            <li>
+                                <a class="dropdown-item"
+                                   th:href="@{'/admin/users/page/' + ${currentPage} + '?sort=id&dir=desc'}">
+                                    Sort By Id (Desc)
+                                </a>
+                            </li>
+                            <hr class="dropdown-divider">
+                            <li>
+                                <a class="dropdown-item"
+                                   th:href="@{'/admin/users/page/' + ${currentPage} + '?sort=firstName&dir=asc'}">
+                                    Sort By First Name (Asc)
+                                </a>
+                            </li>
+                            <hr class="dropdown-divider">
+                            <li>
+                                <a class="dropdown-item"
+                                   th:href="@{'/admin/users/page/' + ${currentPage} + '?sort=firstName&dir=desc'}">
+                                    Sort By First Name (Desc)
+                                </a>
+                            </li>
+                            <hr class="dropdown-divider">
+                            <li>
+                                <a class="dropdown-item"
+                                   th:href="@{'/admin/users/page/' + ${currentPage} + '?sort=lastName&dir=asc'}">
+                                    Sort By Last Name (Asc)
+                                </a>
+                            </li>
+                            <hr class="dropdown-divider">
+                            <li>
+                                <a class="dropdown-item"
+                                   th:href="@{'/admin/users/page/' + ${currentPage} + '?sort=lastName&dir=desc'}">
+                                    Sort By Last Name (Desc)
+                                </a>
+                            </li>
+                            <hr class="dropdown-divider">
+                            <li>
+                                <a class="dropdown-item"
+                                   th:href="@{'/admin/users/page/' + ${currentPage} + '?sort=email&dir=asc'}">
+                                    Sort By Email (Asc)
+                                </a>
+                            </li>
+                            <hr class="dropdown-divider">
+                            <li>
+                                <a class="dropdown-item"
+                                   th:href="@{'/admin/users/page/' + ${currentPage} + '?sort=email&dir=desc'}">
+                                    Sort By Email (Desc)
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="rounded-3 overflow-hidden shadow">
+                    <table class="table table-bordered table-striped table-hover table-responsive-xl m-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th th:text="#{label.id}"></th>
+                                <th th:text="#{label.photo}"></th>
+                                <th th:text="#{label.firstName}"></th>
+                                <th th:text="#{label.lastName}"></th>
+                                <th th:text="#{label.gender}"></th>
+                                <th th:text="#{label.email}"></th>
+                                <th th:text="#{label.enabled}"></th>
+                                <th th:text="#{label.roles}"></th>
+                                <th th:text="#{label.actions}"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="user: ${users}"
+                                th:id="${'user_row_' + user.id}">
+                                <td th:text="${user.id}"></td>
+                                <td>
+                                    <img th:src="@{${user.photoUrl != null ? '/uploads/user/' + user.photoUrl : '/images/avatar.jpg'}}"
+                                         class="rounded"
+                                         style="width: 40px; height: 40px;"
+                                         alt="">
+                                </td>
+                                <td th:text="${user.firstName}"></td>
+                                <td th:text="${user.lastName}"></td>
+                                <td th:text="${user.gender}"></td>
+                                <td th:text="${user.email}"></td>
+                                <td>
+                                    <span class="user-state-icon-enabled text-success"
+                                          th:classappend="${user.enabled == false ? 'd-none' : ''}">
+                                        <i class="fa fa-check-circle"></i>
+                                    </span>
+
+                                    <span class="user-state-icon-disabled text-danger"
+                                          th:classappend="${user.enabled == true ? 'd-none' : ''}">
+                                        <i class="fa fa-times-circle"></i>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span th:each="role: ${user.roles}" th:text="${' [' + role.name + '] '}"></span>
+                                </td>
+                                <td>
+                                    <div style="display: inline-block"
+                                         data-bs-toggle="tooltip"
+                                         data-bs-placement="top"
+                                         th:title="#{label.editUser}">
+                                        <a class="btn btn-primary btn-sm"
+                                           target="_blank"
+                                           th:href="${'/admin/users/update/' + user.id}">
+                                           <i class="fa fa-edit"></i>
+                                        </a>
+                                    </div>
+                                    <div style="display: inline-block"
+                                         data-bs-toggle="tooltip"
+                                         data-bs-placement="top"
+                                         th:title="#{label.deleteUser}">
+                                        <button class="btn btn-danger btn-sm user-delete-action-btn"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#userDeleteConfirmModal"
+                                                th:data-btn-userId="${user.id}">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-5 mb-3 text-center text-secondary">
+                    <span th:text="${'Total ' + userCount + ' results found'}"></span>
+                    <br>
+                    <span th:text="${'Showing result from ' + startCount + ' to ' + endCount}"></span>
+                </div>
+
+                <nav th:if="${pageCount > 1}">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" th:classappend="${currentPage <= 1 ? 'disabled' : ''}">
+                            <a class="page-link"
+                               th:href="@{'/admin/users/page/1' + ${requestParamString}}">
+                                <i class="fa fa-angles-left"></i>
+                            </a>
+                        </li>
+
+                        <li class="page-item" th:classappend="${currentPage <= 1 ? 'disabled' : ''}">
+                            <a class="page-link"
+                               th:href="@{'/admin/users/page/' + ${currentPage - 1} + ${requestParamString}}">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        </li>
+
+                        <li class="page-item" th:if="${(currentPage - 2) > 0}">
+                            <a class="page-link"
+                               th:href="@{'/admin/users/page/' + ${currentPage - 2} + ${requestParamString}}"
+                               th:text="${currentPage - 2}"></a>
+                        </li>
+                        <li class="page-item" th:if="${(currentPage - 1) > 0}">
+                            <a class="page-link"
+                               th:href="@{'/admin/users/page/' + ${currentPage - 1} + ${requestParamString}}"
+                               th:text="${currentPage - 1}"></a>
+                        </li>
+
+                        <li class="page-item active" aria-current="page">
+                            <a class="page-link"
+                               th:href="@{'/admin/users/page/'+ ${currentPage} + ${requestParamString}}"
+                               th:text="${currentPage}"></a>
+                        </li>
+
+                        <li class="page-item" th:if="${(currentPage + 1) <= pageCount}">
+                            <a class="page-link"
+                               th:href="@{'/admin/users/page/' + ${currentPage + 1} + ${requestParamString}}"
+                               th:text="${currentPage + 1}"></a>
+                        </li>
+                        <li class="page-item" th:if="${(currentPage + 2) <= pageCount}">
+                            <a class="page-link"
+                               th:href="@{'/admin/users/page/' + ${currentPage + 2} + ${requestParamString}}"
+                               th:text="${currentPage + 2}"></a>
+                        </li>
+
+                        <li class="page-item" th:classappend="${currentPage >= pageCount ? 'disabled' : ''}">
+                            <a class="page-link"
+                               th:href="@{'/admin/users/page/' + ${currentPage + 1} + ${requestParamString}}">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        </li>
+
+                        <li class="page-item" th:classappend="${currentPage >= pageCount ? 'disabled' : ''}">
+                            <a class="page-link"
+                               th:href="@{'/admin/users/page/' + ${pageCount} + ${requestParamString}}">
+                                <i class="fa fa-angles-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+
+            <!-- Delete Confirm Modal -->
+            <div class="modal fade"
+                 id="userDeleteConfirmModal"
+                 tabindex="-1"
+                 aria-labelledby="userDeleteConfirmModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="userDeleteConfirmModalLabel" th:text="#{label.deleteUser}"></h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body" th:text="#{label.deleteUserPermanently}"></div>
+                        <div class="modal-footer">
+                            <div class="spinner-border text-dark d-none" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <button id="userDeleteCancelBtn"
+                                    type="button"
+                                    class="btn btn-secondary"
+                                    data-bs-dismiss="modal" th:text="#{label.cancel}"></button>
+                            <button id="userDeleteConfirmBtn"
+                                    type="button"
+                                    class="btn btn-danger"
+                                    data-modal-userId="" th:text="#{label.confirm}"></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ajax Response Modal -->
+            <div class="modal fade"
+                 id="userDeleteResponseModal"
+                 tabindex="-1"
+                 aria-labelledby="userDeleteResponseModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="userDeleteResponseModalLabel"></h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body"></div>
+                    </div>
+                </div>
+            </div>
+            <button id="userDeleteResponseModalBtn" class="d-none visually-hidden" type="button" data-bs-toggle="modal" data-bs-target="#userDeleteResponseModal"></button>
+        </div>
+        <div th:replace="fragments :: site-footer"></div>
+    </div>
+
+    <script type="text/javascript">
+        const userDeleteConfirmModal = $('#userDeleteConfirmModal');
+        const userDeleteActionBtn = $('.user-delete-action-btn');
+        const userDeleteConfirmBtn = $('#userDeleteConfirmBtn');
+        const userDeleteResponseModal = $('#userDeleteResponseModal');
+        const userDeleteResponseModalBtn = $('#userDeleteResponseModalBtn');
+        const spinner = userDeleteConfirmModal.find('.spinner-border');
+
+        userDeleteActionBtn.on('click', function () {
+            userDeleteConfirmBtn.attr('data-modal-userId', $(this).attr('data-btn-userId'));
+        });
+
+        userDeleteConfirmBtn.on('click', function () {
+            const that = $(this);
+            const userId = that.attr('data-modal-userId');
+            const userRow = $(`#user_row_${userId}`);
+            const ajaxUrl = serverContext + 'admin/users/delete';
+
+            spinner.removeClass('d-none');
+
+            setTimeout(function () {
+                $.ajax({
+                    type: 'POST',
+                    url: ajaxUrl,
+                    data: $.param({userId, _csrf}),
+                    cache: false
+                }).done(function (response) {
+                    console.log(response)
+                    userDeleteResponseModal.find('.modal-title').text($('#labelSuccess').text());
+                    userDeleteResponseModal.find('.modal-body').text(response);
+                    userDeleteResponseModalBtn.trigger('click');
+                    userRow.remove();
+                }).fail(function (response) {
+                    console.log(response)
+                    userDeleteResponseModal.find('.modal-title').text($('#labelError').text());
+                    userDeleteResponseModal.find('.modal-body').text(response.responseText);
+                    userDeleteResponseModalBtn.trigger('click');
+                }).always(function () {
+                    spinner.addClass('d-none');
+                });
+            }, 1500);
+        });
+
+
+
+        const userFilterSubmitBtn = $('#userFilterSubmitBtn');
+        const userFilterInput = $('.user-filter-input');
+
+        let destinationUrl = serverContext + 'admin/users/page/1?';
+        let filterInputObj = {};
+
+        userFilterInput.on('change', function () {
+            const that = $(this);
+            filterInputObj[that.attr('data-filter-field')] = that.attr('value');
+        });
+
+        userFilterSubmitBtn.on('click', function () {
+            let count = 0;
+            for (let field in filterInputObj) {
+                destinationUrl += `${field}=${filterInputObj[field]}`;
+                if (++count < Object.keys(filterInputObj).length) destinationUrl += '&';
+            }
+            window.location.href = destinationUrl;
+        });
+
+
+
+        const userSearchForm = $('#userSearchForm');
+        const userSearchField = $('.user-search-field');
+        const userSearchInput = $('#userSearchInput');
+
+        let searchField = $('.user-search-field:checked').val();
+        let searchKeyword = '';
+
+        userSearchField.on('change', function () {
+            searchField = $(this).val();
+        });
+
+        userSearchForm.on('submit', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const that = $(this);
+            searchKeyword = userSearchInput.val();
+
+            if (1 > searchKeyword.length || searchKeyword.length > 256) {
+                that.addClass('was-validated');
+                that.find('.invalid-feedback').removeClass('d-none');
+            } else {
+                let destinationUrl = serverContext + 'admin/users/page/1?';
+                destinationUrl += ('search=' + searchField + '&key=' + searchKeyword);
+                location.href = destinationUrl;
+            }
+        });
+    </script>
+</body>
+</html>

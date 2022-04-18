@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <div th:replace="fragments :: site-header"></div>
+</head>
+<body>
+    <div class="page-wrapper" th:classappend="${#locale}">
+        <div th:replace="fragments :: site-navigation"></div>
+
+        <div class="breadcrumb-wrapper">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a th:href="@{'/'}"><i class="fa fa-home"></i></a></li>
+                    <li class="breadcrumb-item"><a th:href="@{'/login'}" th:text="#{label.login}"></a></li>
+                </ol>
+            </nav>
+        </div>
+
+        <div class="container mt-5">
+            <div id="messageWrapper"
+                 class="card d-flex aligns-items-center justify-content-center text-white me-auto ms-auto"
+                 th:classappend="${verified == true ? 'bg-success' : 'bg-danger'}"
+                 style="max-width: 32rem; margin-top: 200px">
+                <div class="card-header">
+                    <span th:if="${verified == true}" th:text="#{label.emailVerifySuccess}"></span>
+                    <span th:if="${verified == false}" th:text="#{label.invalidToken}"></span>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        <span th:if="${verified == true}" th:text="#{label.emailVerifySuccessDetail}"></span>
+                        <span th:if="${verified == false}" th:text="#{label.emailVerifyErrorDetail}"></span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a th:href="@{'/login'}" class="btn btn-primary" th:text="#{label.loginToAccount}"></a>
+            </div>
+        </div>
+
+        <div th:replace="fragments :: site-footer"></div>
+    </div>
+
+    <script type="text/javascript">
+        const userEmailVerifyForm = $('#userEmailVerifyForm');
+        const userEmailVerifyFormSubmitBtn = $('#userEmailVerifyForm button');
+        const verifyResponseModal = $('#verifyResponseModal');
+        const verifyResponseModalShowBtn = $('#verifyResponseModalShowBtn');
+
+        userEmailVerifyForm.on('submit', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const that = $(this);
+            const token = that.attr('data-token');
+            const ajaxUrl = serverContext + "email-token";
+            const formData = that.serialize();
+
+            that.find('.spinner-border').removeClass('d-none');
+
+            setTimeout(function () {
+                $.ajax({
+                    type: 'POST',
+                    url: ajaxUrl,
+                    data: formData,
+                    cache: false
+                }).done(function (response) {
+                    verifyResponseModal.find('.modal-title').text($('#labelSuccess').text());
+                    verifyResponseModal.find('.modal-body p').text(response);
+                    verifyResponseModalShowBtn.trigger('click');
+                }).fail(function (response) {
+                    verifyResponseModal.find('.modal-title').text($('#labelError').text());
+                    verifyResponseModal.find('.modal-body p').text(response.responseText);
+                    verifyResponseModalShowBtn.trigger('click');
+                }).always(function () {
+                    that.find('.spinner-border').addClass('d-none');
+                });
+            }, 1500);
+        });
+    </script>
+</body>
+</html>
