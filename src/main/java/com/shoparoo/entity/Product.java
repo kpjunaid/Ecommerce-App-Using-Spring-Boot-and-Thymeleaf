@@ -56,5 +56,16 @@ public class Product extends Auditable<String> {
     @JoinColumn(name = "brand_id", nullable = false)
     private Brand brand;
 
-
+    public Product(String name, float costPrice, float resalePrice, Integer quantity,
+                   Boolean inStock, Integer discount, Boolean enabled, Category category, Brand brand) {
+        this.name = name;
+        this.costPrice = costPrice;
+        this.resalePrice = resalePrice;
+        this.quantity = quantity;
+        this.inStock = inStock;
+        this.discount = discount;
+        this.enabled = enabled;
+        this.category = category;
+        this.brand = brand;
+    }
 }
