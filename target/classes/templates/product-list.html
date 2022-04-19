@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <div th:replace="fragments :: site-header"></div>
+</head>
+<body>
+    <div class="page-wrapper" th:classappend="${#locale}">
+        <div th:replace="fragments :: site-navigation"></div>
+
+        <div class="breadcrumb-wrapper">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a th:href="@{'/'}"><i class="fa fa-home"></i></a></li>
+                    <li class="breadcrumb-item"><a th:href="@{'/products'}" th:text="#{label.products}"></a></li>
+                    <li class="breadcrumb-item" th:if="${category != null}">
+                        <a th:href="@{'/products/page/1?categoryId=' + ${category.id}}" th:text="${category.name}"></a>
+                    </li>
+                    <li class="breadcrumb-item" th:if="${brand != null}">
+                        <a th:href="@{'/products/page/1?brandId=' + ${brand.id}}" th:text="${brand.name}"></a>
+                    </li>
+                </ol>
+            </nav>
+        </div>
+
+        <div th:if="${categories != null}" class="mt-3">
+            <a th:each="category: ${categories}"
+               th:href="@{'/products/page/1?categoryId=' + ${category.id}}"
+               th:text="${category.name}"
+               class="rounded-pill text-decoration-none d-inline-block m-2"
+               style="background-color: #f8f8f8; padding: 3px 10px; border: 2px solid #999999; color: #555555;"></a>
+        </div>
+
+        <div th:if="${brands != null}" class="mt-3">
+            <a th:each="brand: ${brands}"
+               th:href="@{'/products/page/1?brandId=' + ${brand.id}}"
+               th:text="${brand.name}"
+               class="rounded-pill text-decoration-none d-inline-block ms-2 m-2"
+               style="background-color: #f8f8f8; padding: 3px 10px; border: 2px solid #999999; color: #555555;"></a>
+        </div>
+
+        <div class="container" style="margin-top: 50px;">
+            <h3 th:if="${products.size() <= 0}" th:text="#{label.noProduct}" class="text-center"></h3>
+
+            <div class="row" th:if="${products.size() > 0}">
+                <div class="product-sort text-end mb-5">
+                    <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle"
+                                id="sortDropdown"
+                                type="button"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false" th:text="${'Sorted By ' + sort + ' (' + dir + ')'}">
+                        </button>
+                        <ul class="dropdown-menu shadow" aria-labelledby="sortDropdown">
+                            <li>
+                                <a class="dropdown-item"
+                                   th:href="@{'/products/page/' + ${currentPage} + ${filterParamString} + '&sort=name&dir=asc'}">
+                                    Default Sort
+                                </a>
+                            </li>
+                            <hr class="dropdown-divider">
+                            <li>
+                                <a class="dropdown-item"
+                                   th:href="@{'/products/page/' + ${currentPage} + ${filterParamString} + '&sort=resalePrice&dir=asc'}">
+                                    Sort By Price (Low to High)
+                                </a>
+                            </li>
+                            <hr class="dropdown-divider">
+                            <li>
+                                <a class="dropdown-item"
+                                   th:href="@{'/products/page/' + ${currentPage} + ${filterParamString} + '&sort=resalePrice&dir=desc'}">
+                                    Sort By Price (High to Low)
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-lg-4" th:each="product: ${products}" th:if="${product.enabled == true}">
+                    <div class="shadow rounded-3 p-4">
+                        <div class="text-center">
+                            <img th:src="@{${product.productPhotos.size() <= 0 ? '/images/thumbnail.jpg' : '/uploads/product/' + product.productPhotos[0].photoUrl}}"
+                                 class="ms-auto me-auto"
+                                 style="max-height: 200px;"
+                                 alt="">
+                        </div>
+                        <h6 th:text="${product.name}" class="mt-5"></h6>
+                        <h4 th:text="${@environment.getProperty('site.currency') + ' ' + product.resalePrice}"
+                            class="mt-3" style="color: #1c8acb;"></h4>
+                        <p class="mt-2" th:text="${product.shortDescription.length() <= 80 ? product.shortDescription : #strings.substring(product.shortDescription, 0, 80) + '...'}"></p>
+                        <p class="text-light d-inline-block rounded-pill mt-2 small"
+                           style="padding: 3px 10px;"
+                           th:classappend="${product.inStock == true ? 'bg-success' : 'bg-danger'}">
+                            <span th:if="${product.inStock == true}" th:text="#{label.inStock}"></span>
+                            <span th:if="${product.inStock != true}" th:text="#{label.outOfStock}"></span>
+                        </p>
+                        <br>
+                        <a th:href="@{'/products/' + ${product.id}}" class="btn btn-primary">
+                            <span th:text="#{label.viewDetail}"></span>
+                            <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <div class="mt-5 mb-3 text-secondary">
+                        <span th:text="${'Total ' + contentCount + ' results found'}"></span>
+                        <br>
+                        <span th:text="${'Showing result from ' + startCount + ' to ' + endCount}"></span>
+                    </div>
+
+                    <nav th:if="${pageCount > 1}">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item" th:classappend="${currentPage <= 1 ? 'disabled' : ''}">
+                                <a class="page-link"
+                                   th:href="@{'/products/page/1' + ${requestParamString}}">
+                                    <i class="fa fa-angles-left"></i>
+                                </a>
+                            </li>
+
+                            <li class="page-item" th:classappend="${currentPage <= 1 ? 'disabled' : ''}">
+                                <a class="page-link"
+                                   th:href="@{'/products/page/' + ${currentPage - 1} + ${requestParamString}}">
+                                    <i class="fa fa-angle-left"></i>
+                                </a>
+                            </li>
+
+                            <li class="page-item" th:if="${(currentPage - 2) > 0}">
+                                <a class="page-link"
+                                   th:href="@{'/products/page/' + ${currentPage - 2} + ${requestParamString}}"
+                                   th:text="${currentPage - 2}"></a>
+                            </li>
+                            <li class="page-item" th:if="${(currentPage - 1) > 0}">
+                                <a class="page-link"
+                                   th:href="@{'/products/page/' + ${currentPage - 1} + ${requestParamString}}"
+                                   th:text="${currentPage - 1}"></a>
+                            </li>
+
+                            <li class="page-item active" aria-current="page">
+                                <a class="page-link"
+                                   th:href="@{'/products/page/'+ ${currentPage} + ${requestParamString}}"
+                                   th:text="${currentPage}"></a>
+                            </li>
+
+                            <li class="page-item" th:if="${(currentPage + 1) <= pageCount}">
+                                <a class="page-link"
+                                   th:href="@{'/products/page/' + ${currentPage + 1} + ${requestParamString}}"
+                                   th:text="${currentPage + 1}"></a>
+                            </li>
+                            <li class="page-item" th:if="${(currentPage + 2) <= pageCount}">
+                                <a class="page-link"
+                                   th:href="@{'/products/page/' + ${currentPage + 2} + ${requestParamString}}"
+                                   th:text="${currentPage + 2}"></a>
+                            </li>
+
+                            <li class="page-item" th:classappend="${currentPage >= pageCount ? 'disabled' : ''}">
+                                <a class="page-link"
+                                   th:href="@{'/products/page/' + ${currentPage + 1} + ${requestParamString}}">
+                                    <i class="fa fa-angle-right"></i>
+                                </a>
+                            </li>
+
+                            <li class="page-item" th:classappend="${currentPage >= pageCount ? 'disabled' : ''}">
+                                <a class="page-link"
+                                   th:href="@{'/products/page/' + ${pageCount} + ${requestParamString}}">
+                                    <i class="fa fa-angles-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        <div th:replace="fragments :: site-footer"></div>
+    </div>
+</body>
+</html>

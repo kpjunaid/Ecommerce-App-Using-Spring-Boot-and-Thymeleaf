@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <div th:replace="fragments :: site-header"></div>
+</head>
+<body>
+    <div class="page-wrapper" th:classappend="${#locale}">
+        <div th:replace="fragments :: site-navigation"></div>
+
+        <div class="breadcrumb-wrapper">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a th:href="@{'/'}"><i class="fa fa-home"></i></a></li>
+                    <li class="breadcrumb-item"><a href="#" th:text="#{label.admin}"></a></li>
+                    <li class="breadcrumb-item"><a th:href="@{'/admin/brands'}" th:text="#{label.brands}"></a></li>
+                </ol>
+            </nav>
+        </div>
+
+        <div class="container-fluid">
+            <div th:if="${brands == null || brands.size() <= 0}">
+                <h1 class="display-6 text-center m-5" th:text="#{label.noBrand}"></h1>
+            </div>
+            <div th:if="${brands != null && brands.size() > 0}">
+                <h1 class="display-6 text-center m-5" th:text="#{label.brandList}"></h1>
+                <div th:if="${message != null}"
+                     class="d-flex justify-content-center"
+                     style="display: inline-block;">
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <span style="padding-right: 10px;"><i class="fa fa-check-circle"></i></span>
+                        <span th:text="${message}"></span>
+                        <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end mb-3">
+                    <a th:href="@{'/admin/brands/create'}" class="btn btn-primary" th:text="#{label.addBrand}"></a>
+                </div>
+
+                <div class="rounded-3 overflow-hidden shadow">
+                    <table class="table table-bordered table-striped table-hover table-responsive-xl m-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th th:text="#{label.id}"></th>
+                                <th th:text="#{label.photo}"></th>
+                                <th th:text="#{label.name}"></th>
+                                <th th:text="#{label.categories}"></th>
+                                <th th:text="#{label.enabled}"></th>
+                                <th th:text="#{label.actions}"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="brand: ${brands}"
+                                th:id="${'brand_row_' + brand.id}">
+                                <td><span th:text="${brand.id}"></span></td>
+                                <td>
+                                    <img th:src="@{${brand.photoUrl != null ? '/uploads/brand/' + brand.photoUrl : '/images/thumbnail.jpg'}}"
+                                         class="rounded"
+                                         style="width: 40px; height: 40px;"
+                                         alt="">
+                                </td>
+                                <td>
+                                    <a th:href="@{'/categories/' + ${brand.id}}" th:text="${brand.name}"></a>
+                                </td>
+                                <td>
+                                    <span th:each="category: ${brand.categories}" th:text="${' [' + category.name + '] '}"></span>
+                                </td>
+                                <td>
+                                    <span class="user-state-icon-enabled text-success"
+                                          th:classappend="${brand.enabled == false ? 'd-none' : ''}">
+                                        <i class="fa fa-check-circle"></i>
+                                    </span>
+
+                                    <span class="user-state-icon-disabled text-danger"
+                                          th:classappend="${brand.enabled == true ? 'd-none' : ''}">
+                                        <i class="fa fa-times-circle"></i>
+                                    </span>
+                                </td>
+                                <td>
+                                    <div style="display: inline-block"
+                                         data-bs-toggle="tooltip"
+                                         data-bs-placement="top"
+                                         th:title="#{label.editBrand}">
+                                        <a class="btn btn-primary btn-sm"
+                                           target="_blank"
+                                           th:href="${'/admin/brands/' + brand.id + '/update'}">
+                                           <i class="fa fa-edit"></i>
+                                        </a>
+                                    </div>
+                                    <div style="display: inline-block"
+                                         data-bs-toggle="tooltip"
+                                         data-bs-placement="top"
+                                         th:title="#{label.deleteBrand}">
+                                        <button class="btn btn-danger btn-sm brand-delete-action-btn"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#brandDeleteConfirmModal"
+                                                th:data-btn-brandId="${brand.id}">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-5 mb-3 text-center text-secondary">
+                    <span th:text="${'Total ' + contentCount + ' results found'}"></span>
+                    <br>
+                    <span th:text="${'Showing result from ' + startCount + ' to ' + endCount}"></span>
+                </div>
+
+                <nav th:if="${pageCount > 1}">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" th:classappend="${currentPage <= 1 ? 'disabled' : ''}">
+                            <a class="page-link"
+                               th:href="@{'/admin/brands/page/1'}">
+                                <i class="fa fa-angles-left"></i>
+                            </a>
+                        </li>
+
+                        <li class="page-item" th:classappend="${currentPage <= 1 ? 'disabled' : ''}">
+                            <a class="page-link"
+                               th:href="@{'/admin/brands/page/' + ${currentPage - 1}}">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        </li>
+
+                        <li class="page-item" th:if="${(currentPage - 2) > 0}">
+                            <a class="page-link"
+                               th:href="@{'/admin/brands/page/' + ${currentPage - 2}}"
+                               th:text="${currentPage - 2}"></a>
+                        </li>
+                        <li class="page-item" th:if="${(currentPage - 1) > 0}">
+                            <a class="page-link"
+                               th:href="@{'/admin/brands/page/' + ${currentPage - 1}}"
+                               th:text="${currentPage - 1}"></a>
+                        </li>
+
+                        <li class="page-item active" aria-current="page">
+                            <a class="page-link"
+                               th:href="@{'/admin/brands/page/'+ ${currentPage}}"
+                               th:text="${currentPage}"></a>
+                        </li>
+
+                        <li class="page-item" th:if="${(currentPage + 1) <= pageCount}">
+                            <a class="page-link"
+                               th:href="@{'/admin/brands/page/' + ${currentPage + 1}}"
+                               th:text="${currentPage + 1}"></a>
+                        </li>
+                        <li class="page-item" th:if="${(currentPage + 2) <= pageCount}">
+                            <a class="page-link"
+                               th:href="@{'/admin/brands/page/' + ${currentPage + 2}}"
+                               th:text="${currentPage + 2}"></a>
+                        </li>
+
+                        <li class="page-item" th:classappend="${currentPage >= pageCount ? 'disabled' : ''}">
+                            <a class="page-link"
+                               th:href="@{'/admin/brands/page/' + ${currentPage + 1}}">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        </li>
+
+                        <li class="page-item" th:classappend="${currentPage >= pageCount ? 'disabled' : ''}">
+                            <a class="page-link"
+                               th:href="@{'/admin/brands/page/' + ${pageCount}}">
+                                <i class="fa fa-angles-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+
+            <!-- Delete Confirm Modal -->
+            <div class="modal fade"
+                 id="brandDeleteConfirmModal"
+                 tabindex="-1"
+                 aria-labelledby="brandDeleteConfirmModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="brandDeleteConfirmModalLabel" th:text="#{label.deleteBrand}"></h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body" th:text="#{label.deleteBrandPermanently}"></div>
+                        <div class="modal-footer">
+                            <div class="spinner-border text-dark d-none" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <button id="brandDeleteCancelBtn"
+                                    type="button"
+                                    class="btn btn-secondary"
+                                    data-bs-dismiss="modal" th:text="#{label.cancel}"></button>
+                            <button id="brandDeleteConfirmBtn"
+                                    type="button"
+                                    class="btn btn-danger"
+                                    data-modal-userId="" th:text="#{label.confirm}"></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ajax Response Modal -->
+            <div class="modal fade"
+                 id="brandDeleteResponseModal"
+                 tabindex="-1"
+                 aria-labelledby="brandDeleteResponseModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="brandDeleteResponseModalLabel"></h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body"></div>
+                    </div>
+                </div>
+            </div>
+            <button id="brandDeleteResponseModalBtn" class="d-none visually-hidden" type="button" data-bs-toggle="modal" data-bs-target="#brandDeleteResponseModal"></button>
+        </div>
+        <div th:replace="fragments :: site-footer"></div>
+    </div>
+
+    <script type="text/javascript">
+        const brandDeleteConfirmModal = $('#brandDeleteConfirmModal');
+        const brandDeleteActionBtn = $('.brand-delete-action-btn');
+        const brandDeleteConfirmBtn = $('#brandDeleteConfirmBtn');
+        const brandDeleteResponseModal = $('#brandDeleteResponseModal');
+        const brandDeleteResponseModalBtn = $('#brandDeleteResponseModalBtn');
+        const spinner = brandDeleteConfirmModal.find('.spinner-border');
+
+        brandDeleteActionBtn.on('click', function () {
+            brandDeleteConfirmBtn.attr('data-modal-brandId', $(this).attr('data-btn-brandId'));
+        });
+
+        brandDeleteConfirmBtn.on('click', function () {
+            const that = $(this);
+            const brandId = that.attr('data-modal-brandId');
+            const brandRow = $(`#brand_row_${brandId}`);
+            const ajaxUrl = serverContext + 'admin/brands/delete';
+
+            spinner.removeClass('d-none');
+
+            setTimeout(function () {
+                $.ajax({
+                    type: 'POST',
+                    url: ajaxUrl,
+                    data: $.param({brandId, _csrf}),
+                    cache: false
+                }).done(function (response) {
+                    brandDeleteResponseModal.find('.modal-title').text($('#labelSuccess').text());
+                    brandDeleteResponseModal.find('.modal-body').text(response);
+                    brandDeleteResponseModalBtn.trigger('click');
+                    brandRow.remove();
+                }).fail(function (response) {
+                    brandDeleteResponseModal.find('.modal-title').text($('#labelError').text());
+                    brandDeleteResponseModal.find('.modal-body').text(response.responseText);
+                    brandDeleteResponseModalBtn.trigger('click');
+                }).always(function () {
+                    spinner.addClass('d-none');
+                });
+            }, 1500);
+        });
+    </script>
+</body>
+</html>

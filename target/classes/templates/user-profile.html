@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <div th:replace="fragments :: site-header"></div>
+</head>
+<body>
+    <div class="page-wrapper" th:classappend="${#locale}">
+        <div th:replace="fragments :: site-navigation"></div>
+
+        <div class="breadcrumb-wrapper">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a th:href="@{'/'}"><i class="fa fa-home"></i></a></li>
+                    <li class="breadcrumb-item"><a th:href="@{'/profile'}" th:text="#{label.profile}"></a></li>
+                </ol>
+            </nav>
+        </div>
+
+        <div class="container mt-5">
+            <div class="row">
+                <div class="col-lg-4">
+                    <div class="user-profile-info card shadow pt-5 pb-3 rounded-3">
+                        <div class="user-profile-dp text-center">
+                            <img th:src="@{${user.photoUrl != null ? '/uploads/user/' + user.photoUrl : '/images/avatar.jpg'}}"
+                                 class="img-thumbnail shadow-sm rounded-3"
+                                 style="width: 200px;">
+                        </div>
+                        <div class="card-body">
+                            <h3 class="text-center">
+                                <span th:text="${user.firstName != null ? user.firstName : ''}"></span>
+                                <span th:text="${' '}"></span>
+                                <span th:text="${user.lastName != null ? user.lastName : ''}"></span>
+                            </h3>
+                            <ul class="list-inline p-3">
+                                <li>
+                                    <i class="fa fa-envelope"></i>
+                                    <span th:text="${user.email}"></span>
+                                </li>
+                                <li th:if="${user.birthDate != null}">
+                                    <i class="fa fa-birthday-cake"></i>
+                                    <span th:text="${user.birthDate}"></span>
+                                </li>
+                            </ul>
+                            <div class="text-center">
+                                <a th:href="@{'/profile/update/info'}" class="btn btn-primary" th:text="#{label.updateInfo}"></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-8">
+                    <div class="user-profile-order-history card shadow rounded-3">
+                        <div class="card-header">
+                            <h4 class="p-2" th:text="#{label.yourOrders}"></h4>
+                        </div>
+                        <div class="card-body" th:text="#{label.noOrdersInProcess}"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div th:replace="fragments :: site-footer"></div>
+    </div>
+</body>
+</html>

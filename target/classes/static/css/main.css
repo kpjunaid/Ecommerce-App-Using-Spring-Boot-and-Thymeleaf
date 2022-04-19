@@ -1,0 +1,195 @@
+@import "font-face.css";
+
+.h1, .h2, .h3, .h4, .h5, .h6,
+h1, h2, h3, h4, h5, h6 {
+    margin-bottom: 0;
+}
+
+.page-wrapper.en_US {
+    font-family: "Roboto" !important;
+}
+
+.page-wrapper.bn_BD {
+    font-family: "Hind Siliguri" !important;
+}
+
+.table > tbody > tr > td {
+    vertical-align: middle;
+}
+
+.main-nav {
+    background-color: #011627 !important;
+}
+
+.error-page {
+    height: 100vh;
+}
+
+.error-page h2 {
+    font-size: 48px;
+    color: #e91e63;
+}
+
+.error-page .bg-light {
+    width: 50%;
+    padding: 50px;
+    text-align: center;
+    border-radius: 5px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.breadcrumb-wrapper {
+    background-color: #f0f0f0;
+    padding: 10px;
+}
+
+.breadcrumb-wrapper li a {
+    color: #555555;
+    text-decoration: none;
+}
+
+.breadcrumb-wrapper li a:hover {
+    text-decoration: underline;
+}
+
+.user-nav-dropdown-btn::after,
+.user-nav-dropdown-btn::before {
+    display: none;
+}
+
+/*.signup-form-wrapper,*/
+/*.login-form-wrapper,*/
+/*.update-info-form-wrapper,*/
+/*.update-email-form-wrapper,*/
+/*.update-password-form-wrapper,*/
+/*.forgot-password-form-wrapper,*/
+/*.reset-password-form-wrapper {*/
+/*    width: 650px;*/
+/*}*/
+
+.signup-submit-btn > div > *,
+.login-submit-btn > div > *,
+.update-info-submit-btn > div > *,
+.update-email-submit-btn > div > *,
+.update-password-submit-btn > div > *,
+.forgot-password-submit-btn > div > *,
+.reset-password-submit-btn > div > * {
+    vertical-align: middle;
+}
+
+.user-profile-info .card-body ul {
+    list-style: none;
+}
+
+.user-profile-info .card-body ul li {
+    padding: 5px 0;
+}
+
+.user-profile-info .card-body ul li i {
+    padding-right: 7px;
+}
+
+
+
+.upload__box {
+    padding: 40px;
+}
+.upload__inputfile {
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+}
+.upload__btn {
+    display: inline-block;
+    font-weight: 600;
+    color: #fff;
+    text-align: center;
+    min-width: 116px;
+    padding: 5px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px solid;
+    background-color: #4045ba;
+    border-color: #4045ba;
+    border-radius: 10px;
+    line-height: 26px;
+    font-size: 14px;
+}
+.upload__btn:hover {
+    background-color: unset;
+    color: #4045ba;
+    transition: all 0.3s ease;
+}
+.upload__btn-box {
+    margin-bottom: 10px;
+}
+.upload__img-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -10px;
+}
+.upload__img-box {
+    width: 200px;
+    padding: 0 10px;
+    margin-bottom: 12px;
+}
+.upload__img-close {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.5);
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    text-align: center;
+    line-height: 24px;
+    z-index: 1;
+    cursor: pointer;
+}
+.upload__img-close:after {
+    content: "✖";
+    font-size: 14px;
+    color: white;
+}
+
+.img-bg {
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    position: relative;
+    padding-bottom: 100%;
+}
+
+.btn .fa.rotate {
+    animation: rotate 1s linear;
+}
+
+@keyframes rotate {
+    0%{
+        transform: rotate(0deg);
+    }
+    50%{
+        transform: rotate(180deg);
+    }
+    100%{
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width:  767px) {
+    .error-page h2 {
+        font-size: 100px;
+    }
+    .error-page h4 {
+        font-size: 28px;
+    }
+    .error-page .bg-light {
+        width: 100%;
+    }
+}

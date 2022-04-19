@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <div th:replace="fragments :: site-header"></div>
+</head>
+<body>
+    <div class="page-wrapper" th:classappend="${#locale}">
+        <div th:replace="fragments :: site-navigation"></div>
+
+        <div class="breadcrumb-wrapper">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a th:href="@{'/'}"><i class="fa fa-home"></i></a></li>
+                    <li class="breadcrumb-item"><a href="#" th:text="#{label.admin}"></a></li>
+                    <li class="breadcrumb-item"><a th:href="@{'/admin/products'}" th:text="#{label.products}"></a></li>
+                </ol>
+            </nav>
+        </div>
+
+        <div class="container-fluid">
+            <div th:if="${products == null || products.size() <= 0}">
+                <h1 class="display-6 text-center m-5" th:text="#{label.noProduct}"></h1>
+            </div>
+            <div th:if="${products != null && products.size() > 0}">
+                <h1 class="display-6 text-center m-5" th:text="#{label.productList}"></h1>
+
+                <div class="d-flex justify-content-end mb-3">
+                    <a th:href="@{'/admin/products/create'}" class="btn btn-primary" th:text="#{label.addProduct}"></a>
+                </div>
+
+                <div class="rounded-3 overflow-hidden shadow">
+                    <table class="table table-bordered table-striped table-hover table-responsive-xl m-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th th:text="#{label.id}"></th>
+                                <th th:text="#{label.name}"></th>
+                                <th th:text="#{label.category}"></th>
+                                <th th:text="#{label.brand}"></th>
+                                <th th:text="#{label.enabled}"></th>
+                                <th th:text="#{label.inStock}"></th>
+                                <th th:text="#{label.quantity}"></th>
+                                <th th:text="#{label.costPrice}"></th>
+                                <th th:text="#{label.resalePrice}"></th>
+                                <th th:text="#{label.actions}"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="product: ${products}"
+                                th:id="${'product_row_' + product.id}">
+                                <td><span th:text="${product.id}"></span></td>
+                                <td>
+                                    <a th:href="@{'/products/' + ${product.id}}" th:text="${product.name}"></a>
+                                </td>
+                                <td th:text="${product.category.name}"></td>
+                                <td th:text="${product.brand.name}"></td>
+                                <td>
+                                    <span class="user-state-icon-enabled text-success"
+                                          th:classappend="${product.enabled == false ? 'd-none' : ''}">
+                                        <i class="fa fa-check-circle"></i>
+                                    </span>
+
+                                    <span class="user-state-icon-disabled text-danger"
+                                          th:classappend="${product.enabled == true ? 'd-none' : ''}">
+                                        <i class="fa fa-times-circle"></i>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="user-state-icon-enabled text-success"
+                                          th:classappend="${product.inStock == false ? 'd-none' : ''}">
+                                        <i class="fa fa-check-circle"></i>
+                                    </span>
+
+                                    <span class="user-state-icon-disabled text-danger"
+                                          th:classappend="${product.inStock == true ? 'd-none' : ''}">
+                                        <i class="fa fa-times-circle"></i>
+                                    </span>
+                                </td>
+                                <td th:text="${product.quantity}"></td>
+                                <td th:text="${product.costPrice}"></td>
+                                <td th:text="${product.resalePrice}"></td>
+                                <td>
+                                    <div style="display: inline-block"
+                                         data-bs-toggle="tooltip"
+                                         data-bs-placement="top"
+                                         th:title="#{label.editProduct}">
+                                        <a class="btn btn-primary btn-sm"
+                                           target="_blank"
+                                           th:href="${'/admin/products/update/' + product.id}">
+                                           <i class="fa fa-edit"></i>
+                                        </a>
+                                    </div>
+                                    <div style="display: inline-block"
+                                         data-bs-toggle="tooltip"
+                                         data-bs-placement="top"
+                                         th:title="#{label.deleteProduct}">
+                                        <button class="product-delete-action-btn btn btn-danger btn-sm"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#productDeleteConfirmModal"
+                                                th:data-btn-productId="${product.id}">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-5 mb-3 text-center text-secondary">
+                    <span th:text="${'Total ' + contentCount + ' results found'}"></span>
+                    <br>
+                    <span th:text="${'Showing result from ' + startCount + ' to ' + endCount}"></span>
+                </div>
+
+                <nav th:if="${pageCount > 1}">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" th:classappend="${currentPage <= 1 ? 'disabled' : ''}">
+                            <a class="page-link"
+                               th:href="@{'/admin/brands/page/1'}">
+                                <i class="fa fa-angles-left"></i>
+                            </a>
+                        </li>
+
+                        <li class="page-item" th:classappend="${currentPage <= 1 ? 'disabled' : ''}">
+                            <a class="page-link"
+                               th:href="@{'/admin/brands/page/' + ${currentPage - 1}}">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        </li>
+
+                        <li class="page-item" th:if="${(currentPage - 2) > 0}">
+                            <a class="page-link"
+                               th:href="@{'/admin/brands/page/' + ${currentPage - 2}}"
+                               th:text="${currentPage - 2}"></a>
+                        </li>
+                        <li class="page-item" th:if="${(currentPage - 1) > 0}">
+                            <a class="page-link"
+                               th:href="@{'/admin/brands/page/' + ${currentPage - 1}}"
+                               th:text="${currentPage - 1}"></a>
+                        </li>
+
+                        <li class="page-item active" aria-current="page">
+                            <a class="page-link"
+                               th:href="@{'/admin/brands/page/'+ ${currentPage}}"
+                               th:text="${currentPage}"></a>
+                        </li>
+
+                        <li class="page-item" th:if="${(currentPage + 1) <= pageCount}">
+                            <a class="page-link"
+                               th:href="@{'/admin/brands/page/' + ${currentPage + 1}}"
+                               th:text="${currentPage + 1}"></a>
+                        </li>
+                        <li class="page-item" th:if="${(currentPage + 2) <= pageCount}">
+                            <a class="page-link"
+                               th:href="@{'/admin/brands/page/' + ${currentPage + 2}}"
+                               th:text="${currentPage + 2}"></a>
+                        </li>
+
+                        <li class="page-item" th:classappend="${currentPage >= pageCount ? 'disabled' : ''}">
+                            <a class="page-link"
+                               th:href="@{'/admin/brands/page/' + ${currentPage + 1}}">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        </li>
+
+                        <li class="page-item" th:classappend="${currentPage >= pageCount ? 'disabled' : ''}">
+                            <a class="page-link"
+                               th:href="@{'/admin/brands/page/' + ${pageCount}}">
+                                <i class="fa fa-angles-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+
+            <!-- Delete Confirm Modal -->
+            <div class="modal fade"
+                 id="productDeleteConfirmModal"
+                 tabindex="-1"
+                 aria-labelledby="productDeleteConfirmModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="productDeleteConfirmModalLabel" th:text="#{label.deleteProduct}"></h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body" th:text="#{label.deleteProductPermanently}"></div>
+                        <div class="modal-footer">
+                            <div class="spinner-border text-dark d-none" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <button id="productDeleteCancelBtn"
+                                    type="button"
+                                    class="btn btn-secondary"
+                                    data-bs-dismiss="modal" th:text="#{label.cancel}"></button>
+                            <button id="productDeleteConfirmBtn"
+                                    type="button"
+                                    class="btn btn-danger"
+                                    data-modal-productId="" th:text="#{label.confirm}"></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ajax Response Modal -->
+            <div class="modal fade"
+                 id="productDeleteResponseModal"
+                 tabindex="-1"
+                 aria-labelledby="productDeleteResponseModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="productDeleteResponseModalLabel"></h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body"></div>
+                    </div>
+                </div>
+            </div>
+            <button id="productDeleteResponseModalBtn" class="d-none visually-hidden" type="button" data-bs-toggle="modal" data-bs-target="#productDeleteResponseModal"></button>
+        </div>
+        <div th:replace="fragments :: site-footer"></div>
+    </div>
+
+    <script type="text/javascript">
+        const productDeleteConfirmModal = $('#productDeleteConfirmModal');
+        const productDeleteActionBtn = $('.product-delete-action-btn');
+        const productDeleteConfirmBtn = $('#productDeleteConfirmBtn');
+        const productDeleteResponseModal = $('#productDeleteResponseModal');
+        const productDeleteResponseModalBtn = $('#productDeleteResponseModalBtn');
+        const spinner = productDeleteConfirmModal.find('.spinner-border');
+
+        productDeleteActionBtn.on('click', function () {
+            productDeleteConfirmBtn.attr('data-modal-productId', $(this).attr('data-btn-productId'));
+        });
+
+        productDeleteConfirmBtn.on('click', function () {
+            const that = $(this);
+            const productId = that.attr('data-modal-productId');
+            const productRow = $(`#product_row_${productId}`);
+            const ajaxUrl = serverContext + 'admin/products/delete';
+
+            spinner.removeClass('d-none');
+
+            setTimeout(function () {
+                $.ajax({
+                    type: 'POST',
+                    url: ajaxUrl,
+                    data: $.param({productId, _csrf}),
+                    cache: false
+                }).done(function (response) {
+                    productDeleteResponseModal.find('.modal-title').text($('#labelSuccess').text());
+                    productDeleteResponseModal.find('.modal-body').text(response);
+                    productDeleteResponseModalBtn.trigger('click');
+                    productRow.remove();
+                }).fail(function (response) {
+                    productDeleteResponseModal.find('.modal-title').text($('#labelError').text());
+                    productDeleteResponseModal.find('.modal-body').text(response.responseText);
+                    productDeleteResponseModalBtn.trigger('click');
+                }).always(function () {
+                    spinner.addClass('d-none');
+                });
+            }, 1500);
+        });
+    </script>
+</body>
+</html>
